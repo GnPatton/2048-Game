@@ -1,5 +1,7 @@
 package com.example.a2048;
 
+import android.util.Log;
+
 import java.util.Random;
 
 public class Field
@@ -12,6 +14,11 @@ public class Field
         gameOver = false;
         field = new int[4][4];
 
+        reset();
+    }
+
+    public void reset()
+    {
         for(int i=0; i<4; i++)
             for(int j=0; j<4; j++)
                 field[i][j] = 0;
@@ -32,30 +39,9 @@ public class Field
         return out;
     }
 
-    public int getState(int x, int y)
-    {
-        return field[x][y];
-    }
-
     public void setState(int x, int y, int state)
     {
         field[x][y] = state;
-    }
-
-    public int[] getColumn(int x)
-    {
-        return field[x];
-    }
-
-    public int[] getLine(int x)
-    {
-        int[] line = new int[4];
-
-        for(int i=0; i<4; i++)
-        {
-            line[i] = field[i][x];
-        }
-        return line;
     }
 
     public void createInitialCells()
@@ -82,7 +68,7 @@ public class Field
         boolean isPlaced = false;
         while(!isPlaced)
         {
-            if(getState(currentX, currentY) == 0)
+            if(field[currentX][currentY] == 0)
             {
                 setState(currentX, currentY, state);
                 isPlaced = true;
@@ -113,6 +99,183 @@ public class Field
     public boolean isGameOver()
     {
         return gameOver;
+    }
+
+    public void shift(Direction direction)
+    {
+        boolean hasChange = false;
+
+        switch(direction)
+        {
+            case RIGHT:
+                for(int i=0; i<4; i++)
+                {
+                    for(int j=3; j>0; j--)
+                    {
+                        for(int k=0; k<4; k++)
+                        {
+                            if(k<3)
+                            {
+                                if (field[i][k]!=0 && field[i][k+1]==0)
+                                {
+                                    int buff;
+                                    buff = field[i][k];
+                                    field[i][k] = field[i][k+1];
+                                    field[i][k+1] = buff;
+                                    hasChange = true;
+                                    k=0;
+                                }
+                            }
+                            else if(k==3)
+                            {
+                                if(field[i][k] == field[i][k-1])
+                                {
+                                    field[i][k] *= 2;
+                                    field[i][k-1] = 0;
+                                    hasChange = true;
+                                }
+                            }
+
+                            if(field[i][j] == field[i][j-1] && field[i][j] != 0)
+                            {
+                                field[i][j] *= 2;
+                                field[i][j-1] = 0;
+                                j=3;
+                                hasChange = true;
+                            }
+                        }
+                    }
+                }
+                break;
+
+            case LEFT:
+                for(int i=0; i<4; i++)
+                {
+                    for(int j=0; j<3; j++)
+                    {
+                        for(int k=3; k>=0; k--)
+                        {
+                            if(k>0)
+                            {
+                                if (field[i][k]!=0 && field[i][k-1]==0)
+                                {
+                                    int buff;
+                                    buff = field[i][k];
+                                    field[i][k] = field[i][k-1];
+                                    field[i][k-1] = buff;
+                                    hasChange = true;
+                                    k=3;
+                                }
+                            }
+                            else if(k==0)
+                            {
+                                if(field[i][k] == field[i][k+1])
+                                {
+                                    field[i][k] *= 2;
+                                    field[i][k+1] = 0;
+                                    hasChange = true;
+                                }
+                            }
+
+                            if(field[i][j] == field[i][j+1] && field[i][j+1] != 0)
+                            {
+                                field[i][j] *= 2;
+                                field[i][j+1] = 0;
+                                j=0;
+                                hasChange = true;
+                            }
+                        }
+
+                    }
+                }
+                break;
+
+            case UP:
+                for(int i=0; i<4; i++)
+                {
+                    for(int j=0; j<3; j++)
+                    {
+                        for(int k=0; k<4; k++)
+                        {
+                            if(k<3)
+                            {
+                                if (field[k][i]==0 && field[k+1][i]!=0)
+                                {
+                                    int buff;
+                                    buff = field[k][i];
+                                    field[k][i] = field[k+1][i];
+                                    field[k+1][i] = buff;
+                                    hasChange = true;
+                                    k=0;
+                                }
+                            }
+                            else if(k==3)
+                            {
+                                if(field[k][i] == field[k-1][i])
+                                {
+                                    field[k][i] *= 2;
+                                    field[k-1][i] = 0;
+                                    hasChange = true;
+                                }
+                            }
+
+                            if(field[j][i] == field[j+1][i] && field[j+1][i] != 0)
+                            {
+                                field[j][i] *= 2;
+                                field[j+1][i] = 0;
+                                j=0;
+                                hasChange = true;
+                            }
+                        }
+
+                    }
+                }
+                break;
+
+            case DOWN:
+                for(int i=0; i<4; i++)
+                {
+                    for(int j=0; j<3; j++)
+                    {
+                        for(int k=3; k>=0; k--)
+                        {
+                            if(k>0)
+                            {
+                                if (field[k][i]==0 && field[k-1][i]!=0)
+                                {
+                                    int buff;
+                                    buff = field[k][i];
+                                    field[k][i] = field[k-1][i];
+                                    field[k-1][i] = buff;
+                                    hasChange = true;
+                                    k=3;
+                                }
+                            }
+                            else if(k==0)
+                            {
+                                if(field[k][i] == field[k+1][i])
+                                {
+                                    field[k][i] *= 2;
+                                    field[k+1][i] = 0;
+                                    hasChange = true;
+                                }
+                            }
+
+                            if(field[j][i] == field[j+1][i] && field[j+1][i] != 0)
+                            {
+                                field[j][i] *= 2;
+                                field[j+1][i] = 0;
+                                j=0;
+                                hasChange = true;
+                            }
+                        }
+
+                    }
+                }
+                break;
+        }
+        if(hasChange)
+            generateNewCell();
     }
 
 }
