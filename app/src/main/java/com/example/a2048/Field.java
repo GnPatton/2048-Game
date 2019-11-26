@@ -24,6 +24,17 @@ public class Field
                 field[i][j] = 0;
     }
 
+    public int[] getColumn(int x)
+    {
+        int[] line = new int[4];
+
+        for(int i=0; i<4; i++)
+        {
+            line[i] = field[i][x];
+        }
+        return line;
+    }
+
     public StringBuilder displayField()
     {
         StringBuilder out = new StringBuilder();
@@ -128,7 +139,7 @@ public class Field
                             }
                             else if(k==3)
                             {
-                                if(field[i][k] == field[i][k-1])
+                                if(field[i][k] == field[i][k-1] && field[i][k]!=0)
                                 {
                                     field[i][k] *= 2;
                                     field[i][k-1] = 0;
@@ -169,7 +180,7 @@ public class Field
                             }
                             else if(k==0)
                             {
-                                if(field[i][k] == field[i][k+1])
+                                if(field[i][k] == field[i][k+1] && field[i][k]!=0)
                                 {
                                     field[i][k] *= 2;
                                     field[i][k+1] = 0;
@@ -206,12 +217,12 @@ public class Field
                                     field[k][i] = field[k+1][i];
                                     field[k+1][i] = buff;
                                     hasChange = true;
-                                    k=0;
+                                    k=-1;
                                 }
                             }
                             else if(k==3)
                             {
-                                if(field[k][i] == field[k-1][i])
+                                if(field[k][i] == field[k-1][i] && field[k][i]!=0)
                                 {
                                     field[k][i] *= 2;
                                     field[k-1][i] = 0;
@@ -253,7 +264,7 @@ public class Field
                             }
                             else if(k==0)
                             {
-                                if(field[k][i] == field[k+1][i])
+                                if(field[k][i] == field[k+1][i] && field[k][i]!=0)
                                 {
                                     field[k][i] *= 2;
                                     field[k+1][i] = 0;
