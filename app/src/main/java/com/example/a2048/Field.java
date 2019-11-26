@@ -1,18 +1,20 @@
 package com.example.a2048;
 
-import android.util.Log;
-
 import java.util.Random;
 
 public class Field
 {
+    private int score = 0;
+    private int previousStateScore = 0;
     private int[][] field;
+    private int[][] previousStateField;
     private boolean gameOver;
 
     public Field()
     {
         gameOver = false;
         field = new int[4][4];
+        previousStateField = new int[4][4];
 
         reset();
     }
@@ -22,6 +24,25 @@ public class Field
         for(int i=0; i<4; i++)
             for(int j=0; j<4; j++)
                 field[i][j] = 0;
+        score = 0;
+    }
+
+    public void undo()
+    {
+        for(int i=0; i<4; i++)
+            for(int j=0; j<4; j++)
+                field[i][j] = previousStateField[i][j];
+
+        score = previousStateScore;
+    }
+
+    private void copy()
+    {
+        for(int i=0; i<4; i++)
+            for(int j=0; j<4; j++)
+                previousStateField[i][j] = field[i][j];
+
+        previousStateScore = score;
     }
 
     public int[] getColumn(int x)
@@ -48,6 +69,11 @@ public class Field
             out.append("\n");
         }
         return out;
+    }
+
+    public String displayScore()
+    {
+        return String.valueOf(score);
     }
 
     public void setState(int x, int y, int state)
@@ -114,6 +140,7 @@ public class Field
 
     public void shift(Direction direction)
     {
+        copy();
         boolean hasChange = false;
 
         switch(direction)
@@ -144,6 +171,7 @@ public class Field
                                     field[i][k] *= 2;
                                     field[i][k-1] = 0;
                                     hasChange = true;
+                                    score += field[i][k];
                                 }
                             }
 
@@ -151,6 +179,7 @@ public class Field
                             {
                                 field[i][j] *= 2;
                                 field[i][j-1] = 0;
+                                score += field[i][j];
                                 j=3;
                                 hasChange = true;
                             }
@@ -185,6 +214,7 @@ public class Field
                                     field[i][k] *= 2;
                                     field[i][k+1] = 0;
                                     hasChange = true;
+                                    score += field[i][k];
                                 }
                             }
 
@@ -192,6 +222,7 @@ public class Field
                             {
                                 field[i][j] *= 2;
                                 field[i][j+1] = 0;
+                                score += field[i][j];
                                 j=0;
                                 hasChange = true;
                             }
@@ -227,6 +258,7 @@ public class Field
                                     field[k][i] *= 2;
                                     field[k-1][i] = 0;
                                     hasChange = true;
+                                    score += field[k][i];
                                 }
                             }
 
@@ -234,6 +266,7 @@ public class Field
                             {
                                 field[j][i] *= 2;
                                 field[j+1][i] = 0;
+                                score += field[j][i];
                                 j=0;
                                 hasChange = true;
                             }
@@ -269,6 +302,7 @@ public class Field
                                     field[k][i] *= 2;
                                     field[k+1][i] = 0;
                                     hasChange = true;
+                                    score += field[k][i];
                                 }
                             }
 
@@ -276,6 +310,7 @@ public class Field
                             {
                                 field[j][i] *= 2;
                                 field[j+1][i] = 0;
+                                score += field[j][i];
                                 j=0;
                                 hasChange = true;
                             }
