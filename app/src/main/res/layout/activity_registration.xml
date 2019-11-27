@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center_vertical"
     android:background="@color/colorMainLight"
-    tools:context=".LoginActivity">
+    tools:context=".RegistrationActivity">
+
 
     <TextView
         android:id="@+id/loginText"
@@ -42,32 +42,47 @@
         android:layout_gravity="center_vertical|center_horizontal"
         android:inputType="textPassword"/>
 
-    <Button
-        android:id="@+id/loginButton"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="10dp"
-        android:text="Log In"
-        android:onClick="startGame"/>
-
     <TextView
-        android:id="@+id/questionText"
+        android:id="@+id/repeatPasswordText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|center_vertical"
         android:gravity="center_vertical|center_horizontal"
-        android:layout_marginTop="20dp"
-        android:text="Don't have an account?"
-        android:textSize="15sp"/>
+        android:layout_marginTop="15dp"
+        android:text="Repeat password"
+        android:textSize="20sp"/>
+
+    <EditText
+        android:id="@+id/repeatPasswordEditText"
+        android:layout_width="250dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:inputType="textPassword"/>
 
     <Button
-        android:id="@+id/createAccountButton"
+        android:id="@+id/confirmButton"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:text="Confirm" />
+
+    <TextView
+        android:id="@+id/orText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:gravity="center_vertical|center_horizontal"
         android:layout_marginTop="5dp"
-        android:text="Register"
-        android:onClick="registration"/>
+        android:text="or"
+        android:textSize="20sp"/>
+
+    <Button
+        android:id="@+id/googleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:text="Sign up using Google account" />
 
 </LinearLayout>
