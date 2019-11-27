@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,9 +16,9 @@ public class MainActivity extends Activity implements GestureDetector.OnGestureL
 {
     GestureDetector detector;
 
-    TextView fieldText;
+    TextView scoreText;
     Field field;
-    int count = 0;
+    ImageView[][] squares;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -26,7 +27,19 @@ public class MainActivity extends Activity implements GestureDetector.OnGestureL
         setContentView(R.layout.activity_main);
         detector = new GestureDetector(this, this);
         field = new Field();
-        fieldText = findViewById(R.id.fieldText);
+        scoreText = findViewById(R.id.scoreText);
+        squares = new ImageView[4][4];
+
+        for(int i=0; i<4; i++)
+            for(int j=0; j<4; j++)
+            {
+                String id = "image" + i + "x" + j;
+                int resID = getResources().getIdentifier(id, "id", getPackageName());
+                squares[i][j] = findViewById(resID);
+            }
+
+        field.reset();
+
         refresh();
     }
 
@@ -36,41 +49,28 @@ public class MainActivity extends Activity implements GestureDetector.OnGestureL
         return detector.onTouchEvent(event);
     }
 
-    public void next(View view)
-    {
-        if(count == 0)
-        {
-            field.setState(2,2,8);
-            field.setState(0,1,4);
-            field.setState(3,0,2);
-            refresh();
-            count++;
-        }
-        else if(count ==1)
-        {
-            fieldText.setText(Arrays.toString(field.getColumn(0)));
-            count++;
-        }
-        else if(count == 2)
-        {
-            fieldText.setText(Arrays.toString(field.getLine(0)));
-            count = 0;
-        }
-    }
-
     private void refresh()
     {
-        fieldText.setText(field.displayField());
+        for(int i=0; i<4; i++)
+            for(int j=0; j<4; j++)
+            {
+                int id = getResources().getIdentifier("square_" + field.getState(i,j), "drawable", getPackageName());
+                squares[i][j].setImageResource(id);
+            }
+        scoreText.setText(field.displayScore());
     }
 
-    public void newCell(View view)
+    public void restart(View view)
     {
-        field.generateNewCell();
+        field.reset();
         refresh();
-        if(field.isGameOver())
-            fieldText.setText("Game over");
     }
 
+    public void undo(View view)
+    {
+        field.undo();
+        refresh();
+    }
 
     @Override
     public boolean onDown(MotionEvent e)
@@ -87,7 +87,6 @@ public class MainActivity extends Activity implements GestureDetector.OnGestureL
     @Override
     public boolean onSingleTapUp(MotionEvent e)
     {
-        Toast.makeText(this, "Tap up", Toast.LENGTH_SHORT).show();
         return true;
     }
 
@@ -106,18 +105,25 @@ public class MainActivity extends Activity implements GestureDetector.OnGestureL
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
     {
-        Log.d("fling", "VelociryX: " + velocityX);
-        Log.d("fling", "VelociryY: " + velocityY);
+        if (velocityX<0 && (Math.abs(velocityX)>Math.abs(velocityY)))              //LEFT
+        {
+            field.shift(Direction.LEFT);
+            refresh();
+        } else if (velocityX>0 && (Math.abs(velocityX)>Math.abs(velocityY)))         //RIGHT
+        {
+            field.shift(Direction.RIGHT);
+            refresh();
+        }
 
-        if(velocityX<0 && (Math.abs(velocityX) > Math.abs(velocityY)))
-            Toast.makeText(this, "LEFT", Toast.LENGTH_SHORT).show();
-        else if(velocityX>0 && (Math.abs(velocityX) > Math.abs(velocityY)))
-            Toast.makeText(this, "RIGHT", Toast.LENGTH_SHORT).show();
-
-        if(velocityY<0 && (Math.abs(velocityY) > Math.abs(velocityX)))
-            Toast.makeText(this, "UP", Toast.LENGTH_SHORT).show();
-        else if(velocityY>0 && (Math.abs(velocityY) > Math.abs(velocityX)))
-            Toast.makeText(this, "DOWN", Toast.LENGTH_SHORT).show();
+        if (velocityY<0 && (Math.abs(velocityY)>Math.abs(velocityX)))              //UP
+        {
+            field.shift(Direction.UP);
+            refresh();
+        } else if (velocityY>0 && (Math.abs(velocityY)>Math.abs(velocityX)))         //DOWN
+        {
+            field.shift(Direction.DOWN);
+            refresh();
+        }
         return true;
     }
 }

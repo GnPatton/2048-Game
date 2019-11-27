@@ -25,6 +25,7 @@ public class Field
             for(int j=0; j<4; j++)
                 field[i][j] = 0;
         score = 0;
+        createInitialCells();
     }
 
     public void undo()
@@ -45,6 +46,11 @@ public class Field
         previousStateScore = score;
     }
 
+    public int getState(int x, int y)
+    {
+        return field[x][y];
+    }
+
     public int[] getColumn(int x)
     {
         int[] line = new int[4];
@@ -54,21 +60,6 @@ public class Field
             line[i] = field[i][x];
         }
         return line;
-    }
-
-    public StringBuilder displayField()
-    {
-        StringBuilder out = new StringBuilder();
-        for(int i=0; i<4; i++)
-        {
-            for(int j=0; j<4; j++)
-            {
-                out.append(field[i][j]);
-                out.append(" ");
-            }
-            out.append("\n");
-        }
-        return out;
     }
 
     public String displayScore()
@@ -81,7 +72,7 @@ public class Field
         field[x][y] = state;
     }
 
-    public void createInitialCells()
+    private void createInitialCells()
     {
         for(int i=0; i<Constants.COUNT_INITIAL_CELLS; i++)
         {
@@ -323,6 +314,5 @@ public class Field
         if(hasChange)
             generateNewCell();
     }
-
 }
 
