@@ -49,7 +49,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp"
         android:text="Log In"
-        android:onClick="startGame"/>
+        android:onClick="login"/>
 
     <TextView
         android:id="@+id/questionText"
@@ -69,5 +69,16 @@
         android:layout_marginTop="5dp"
         android:text="Register"
         android:onClick="registration"/>
+
+    <TextView
+        android:id="@+id/errorText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:gravity="center_vertical|center_horizontal"
+        android:layout_marginTop="20dp"
+        android:text=""
+        android:textSize="25sp"
+        android:textColor="#FF0000"/>
 
 </LinearLayout>
