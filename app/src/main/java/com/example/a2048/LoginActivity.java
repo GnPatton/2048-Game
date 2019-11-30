@@ -2,10 +2,12 @@ package com.example.a2048;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +21,12 @@ public class LoginActivity extends Activity
     EditText loginEditText;
     EditText passwordEditText;
     TextView errorText;
+    CheckBox rememberMe;
+
+    private final String SHARED_PREFERENCES = "sharedPrefs";
+    private final String LOGIN = "LOGIN";
+    private final String PASSWORD = "LOGIN";
+    private final String CHECKBOX = "CHECKBOX";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -29,16 +37,23 @@ public class LoginActivity extends Activity
         loginEditText = findViewById(R.id.loginEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         errorText = findViewById(R.id.errorText);
+        rememberMe = findViewById(R.id.rememberMeCheckBox);
+        errorText.setVisibility(View.INVISIBLE);
 
         dbHelper = new DBHelper(this);
 
         database = dbHelper.getReadableDatabase();
-    }
 
-    public void startGame(View view)
-    {
-        Intent game = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(game);
+        String savedLogin = loadData("LOGIN");
+        String savedPassword = loadData("PASSWORD");
+        boolean savedCheckbox = loadData("CHECKBOX").equals("true");
+
+        if(savedCheckbox)
+        {
+            loginEditText.setText(savedLogin);
+            passwordEditText.setText(savedPassword);
+            rememberMe.setChecked(savedCheckbox);
+        }
     }
 
     public void registration(View view)
@@ -49,29 +64,39 @@ public class LoginActivity extends Activity
 
     public void login(View view)
     {
-        Cursor cursor = database.query(DBHelper.TABLE_ACCOUNTS, null, null, null, null, null, null);
+        String login = loginEditText.getText().toString();
+        String password = passwordEditText.getText().toString();
 
-        if(cursor.moveToFirst())
+        if(dbHelper.loginExists(database, login, password))
         {
-            int loginIndex = cursor.getColumnIndex(DBHelper.LOGIN);
-            int passwordIndex = cursor.getColumnIndex(DBHelper.PASSWORD);
-            do
-            {
-                String login = cursor.getString(loginIndex);
-                String password = cursor.getString(passwordIndex);
-
-                if(loginEditText.getText().toString().equals(login) && passwordEditText.getText().toString().equals(password))
-                {
-                    Intent game = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(game);
-                    break;
-                }
-            }
-            while (cursor.moveToNext());
-            errorText.setText("Wrong login or password");
+            saveData(login, password, rememberMe.isChecked());
+            errorText.setVisibility(View.INVISIBLE);
+            Intent mainMenu = new Intent(getApplicationContext(), MainMenuActivity.class);
+            mainMenu.putExtra("login", login);
+            startActivity(mainMenu);
         }
         else
-            Toast.makeText(this, "No rows", Toast.LENGTH_SHORT).show();
-        cursor.close();
+        {
+            errorText.setText("Wrong login or password");
+            errorText.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void saveData(String login, String password, boolean checked)
+    {
+        SharedPreferences sharedPref = getSharedPreferences(SHARED_PREFERENCES, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+
+        editor.putString("LOGIN", login);
+        editor.putString("PASSWORD", password);
+        editor.putString("CHECKBOX", String.valueOf(checked));
+
+        editor.apply();
+    }
+
+    private String loadData(String pref)
+    {
+        SharedPreferences sharedPrefer = getSharedPreferences(SHARED_PREFERENCES, MODE_PRIVATE);
+        return sharedPrefer.getString(pref, "");
     }
 }
