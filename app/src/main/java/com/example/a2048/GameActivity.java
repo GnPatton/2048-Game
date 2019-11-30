@@ -1,20 +1,20 @@
 package com.example.a2048;
 
 import android.app.Activity;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.util.Arrays;
-
-public class MainActivity extends Activity implements GestureDetector.OnGestureListener
+public class GameActivity extends Activity implements GestureDetector.OnGestureListener
 {
-    GestureDetector detector;
+    private GestureDetector detector;
+    private DBHelper dbHelper;
+    private SQLiteDatabase database;
+    private String login;
 
     TextView scoreText;
     Field field;
@@ -24,9 +24,15 @@ public class MainActivity extends Activity implements GestureDetector.OnGestureL
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_game);
         detector = new GestureDetector(this, this);
-        field = new Field();
+        dbHelper = new DBHelper(this);
+        database = dbHelper.getReadableDatabase();
+        boolean isNewGame = Boolean.valueOf(getIntent().getExtras().get("isNewGame").toString());
+        login = getIntent().getExtras().getString("login");
+
+        field = new Field(isNewGame, login, database);
+
         scoreText = findViewById(R.id.scoreText);
         squares = new ImageView[4][4];
 
@@ -37,8 +43,6 @@ public class MainActivity extends Activity implements GestureDetector.OnGestureL
                 int resID = getResources().getIdentifier(id, "id", getPackageName());
                 squares[i][j] = findViewById(resID);
             }
-
-        field.reset();
 
         refresh();
     }
@@ -72,6 +76,29 @@ public class MainActivity extends Activity implements GestureDetector.OnGestureL
         refresh();
     }
 
+    private void createState()
+    {
+        new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                StringBuilder builder = new StringBuilder();
+                for(int i=0; i<4; i++)
+                    for(int j=0; j<4; j++)
+                    {
+                        builder.append(field.getState(i, j));
+                        if(i==3 && j== 3)
+                            break;
+                        else
+                            builder.append(",");
+                    }
+
+                dbHelper.saveGameState(database, login, builder.toString(), field.getScore());
+            }
+        }).start();
+    }
+
     @Override
     public boolean onDown(MotionEvent e)
     {
@@ -79,10 +106,7 @@ public class MainActivity extends Activity implements GestureDetector.OnGestureL
     }
 
     @Override
-    public void onShowPress(MotionEvent e)
-    {
-
-    }
+    public void onShowPress(MotionEvent e) {}
 
     @Override
     public boolean onSingleTapUp(MotionEvent e)
@@ -97,10 +121,7 @@ public class MainActivity extends Activity implements GestureDetector.OnGestureL
     }
 
     @Override
-    public void onLongPress(MotionEvent e)
-    {
-
-    }
+    public void onLongPress(MotionEvent e) {}
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
@@ -109,20 +130,25 @@ public class MainActivity extends Activity implements GestureDetector.OnGestureL
         {
             field.shift(Direction.LEFT);
             refresh();
-        } else if (velocityX>0 && (Math.abs(velocityX)>Math.abs(velocityY)))         //RIGHT
+            createState();
+        }
+        else if (velocityX>0 && (Math.abs(velocityX)>Math.abs(velocityY)))         //RIGHT
         {
             field.shift(Direction.RIGHT);
             refresh();
+            createState();
         }
-
         if (velocityY<0 && (Math.abs(velocityY)>Math.abs(velocityX)))              //UP
         {
             field.shift(Direction.UP);
             refresh();
-        } else if (velocityY>0 && (Math.abs(velocityY)>Math.abs(velocityX)))         //DOWN
+            createState();
+        }
+        else if (velocityY>0 && (Math.abs(velocityY)>Math.abs(velocityX)))         //DOWN
         {
             field.shift(Direction.DOWN);
             refresh();
+            createState();
         }
         return true;
     }

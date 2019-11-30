@@ -14,12 +14,16 @@ public class MainMenuActivity extends Activity
     String login;
 
     TextView greetingText;
+    Button continueGame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
+        continueGame = findViewById(R.id.continueGameButton);
+        continueGame.setEnabled(getIntent().getExtras().getBoolean("hasGame"));
+
         login = getIntent().getExtras().getString("login");
 
         greetingText = findViewById(R.id.greetingText);
@@ -31,6 +35,15 @@ public class MainMenuActivity extends Activity
     {
         Intent game = new Intent(getApplicationContext(), GameActivity.class);
         game.putExtra("login", login);
+        game.putExtra("isNewGame", "true");
+        startActivity(game);
+    }
+
+    public void continueGame(View view)
+    {
+        Intent game = new Intent(getApplicationContext(), GameActivity.class);
+        game.putExtra("login", login);
+        game.putExtra("isNewGame", "false");
         startActivity(game);
     }
 }

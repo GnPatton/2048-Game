@@ -1,5 +1,8 @@
 package com.example.a2048;
 
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Pair;
+
 import java.util.Random;
 
 public class Field
@@ -10,13 +13,27 @@ public class Field
     private int[][] previousStateField;
     private boolean gameOver;
 
-    public Field()
+    public Field(boolean isNewGame, String login, SQLiteDatabase database)
     {
         gameOver = false;
         field = new int[4][4];
         previousStateField = new int[4][4];
 
-        reset();
+        if(isNewGame)
+            reset();
+        else
+            loadGame(login, database);
+    }
+
+    private void loadGame(String login, SQLiteDatabase database)
+    {
+        Pair<int[][], Integer> pair = DBHelper.loadGameState(database, login);
+        int[][] prevGame = pair.first;
+        for(int i=0; i<4; i++)
+            for(int j=0; j<4; j++)
+                field[i][j] = prevGame[i][j];
+
+        score = pair.second;
     }
 
     public void reset()
@@ -61,6 +78,12 @@ public class Field
         }
         return line;
     }
+
+    public int getScore()
+    {
+        return score;
+    }
+
 
     public String displayScore()
     {

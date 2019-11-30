@@ -24,9 +24,6 @@ public class LoginActivity extends Activity
     CheckBox rememberMe;
 
     private final String SHARED_PREFERENCES = "sharedPrefs";
-    private final String LOGIN = "LOGIN";
-    private final String PASSWORD = "LOGIN";
-    private final String CHECKBOX = "CHECKBOX";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -43,6 +40,7 @@ public class LoginActivity extends Activity
         dbHelper = new DBHelper(this);
 
         database = dbHelper.getReadableDatabase();
+        dbHelper.selectAll(database);
 
         String savedLogin = loadData("LOGIN");
         String savedPassword = loadData("PASSWORD");
@@ -73,6 +71,12 @@ public class LoginActivity extends Activity
             errorText.setVisibility(View.INVISIBLE);
             Intent mainMenu = new Intent(getApplicationContext(), MainMenuActivity.class);
             mainMenu.putExtra("login", login);
+            int[][] check = dbHelper.loadGameState(database, login).first;
+            if(check[0][0] == 9)
+                mainMenu.putExtra("hasGame", false);
+            else
+                mainMenu.putExtra("hasGame", true);
+
             startActivity(mainMenu);
         }
         else

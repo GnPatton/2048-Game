@@ -12,7 +12,7 @@ import android.widget.TextView;
 public class RegistrationActivity extends AppCompatActivity
 {
     private DBHelper dbHelper;
-    ContentValues contentValues;
+
     SQLiteDatabase database;
 
     TextView errorText;
@@ -33,25 +33,33 @@ public class RegistrationActivity extends AppCompatActivity
         repeatPasswordEditText = findViewById(R.id.repeatPasswordEditText);
 
         dbHelper = new DBHelper(this);
-        contentValues = new ContentValues();
 
         database = dbHelper.getReadableDatabase();
     }
 
     public void confirm(View view)
     {
-        if(passwordEditText.getText().length() != 0 || loginEditText.getText().length() != 0)
-        {
-            if(passwordEditText.getText().toString().equals(repeatPasswordEditText.getText().toString()))
-            {
-                contentValues.put(DBHelper.LOGIN, loginEditText.getText().toString());
-                contentValues.put(DBHelper.PASSWORD, passwordEditText.getText().toString());
+        String login = loginEditText.getText().toString();
+        String password = passwordEditText.getText().toString();
 
-                database.insert(DBHelper.TABLE_ACCOUNTS, null, contentValues);
+        if(password.length() != 0 && login.length() != 0)
+        {
+            if(password.equals(repeatPasswordEditText.getText().toString()))
+            {
+                if(!dbHelper.loginExists(database, login, password))
+                {
+                    dbHelper.createAccount(database, loginEditText.getText().toString(), passwordEditText.getText().toString());
+                    finish();
+                }
+                else
+                {
+                    errorText.setText("This login already exists!");
+                    errorText.setVisibility(View.VISIBLE);
+                }
             }
             else
             {
-                errorText.setText("Password don't match!");
+                errorText.setText("Passwords don't match!");
                 errorText.setVisibility(View.VISIBLE);
             }
         }
@@ -60,6 +68,5 @@ public class RegistrationActivity extends AppCompatActivity
             errorText.setText("Fill all fields!");
             errorText.setVisibility(View.VISIBLE);
         }
-        finish();
     }
 }
