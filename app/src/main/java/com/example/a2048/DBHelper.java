@@ -116,7 +116,7 @@ public class DBHelper extends SQLiteOpenHelper
 
     public static Pair<int[][], Integer> loadGameState(SQLiteDatabase database, String login)
     {
-        Cursor cursor = database.query(DBHelper.TABLE_GAME, null, "user_login=" + "'" + login + "'", null, null, null, null);
+        Cursor cursor = database.query(DBHelper.TABLE_GAME, null, "user_login=" + "'" + login + "'" + " AND " + "isEnded=0", null, null, null, null);
         String state="";
         int score=0;
         if(cursor.moveToFirst())
@@ -145,7 +145,10 @@ public class DBHelper extends SQLiteOpenHelper
                     idx++;
                 }
                 else
-                    out[i][j] = 9; //Костыль пиздец
+                {
+                    out[0][0] = 9; //Костыль пиздец
+                    break;
+                }
             }
         cursor.close();
         return new Pair<>(out, score);

@@ -17,6 +17,7 @@ public class GameActivity extends Activity implements GestureDetector.OnGestureL
     private String login;
 
     TextView scoreText;
+    TextView titleText;
     Field field;
     ImageView[][] squares;
 
@@ -34,6 +35,7 @@ public class GameActivity extends Activity implements GestureDetector.OnGestureL
         field = new Field(isNewGame, login, database);
 
         scoreText = findViewById(R.id.scoreText);
+        titleText = findViewById(R.id.titleText);
         squares = new ImageView[4][4];
 
         for(int i=0; i<4; i++)
@@ -66,6 +68,8 @@ public class GameActivity extends Activity implements GestureDetector.OnGestureL
 
     public void restart(View view)
     {
+        titleText.setTextSize(60);
+        titleText.setText("2048");
         field.reset();
         refresh();
     }
@@ -149,6 +153,11 @@ public class GameActivity extends Activity implements GestureDetector.OnGestureL
             field.shift(Direction.DOWN);
             refresh();
             createState();
+        }
+        if(field.isGameOver())
+        {
+            titleText.setTextSize(40);
+            titleText.setText("Game Over");
         }
         return true;
     }
