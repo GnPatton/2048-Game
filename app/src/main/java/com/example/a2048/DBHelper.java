@@ -7,11 +7,15 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+
+import java.io.ByteArrayOutputStream;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -22,7 +26,7 @@ public class DBHelper extends SQLiteOpenHelper
     private final String PASSWORD_PREF = "LOGIN";
     private final String CHECKBOX = "CHECKBOX";
 
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 3;
     public static final String DATABASE_NAME = "gameDB";
     public static final String TABLE_ACCOUNTS = "user";
     public static final String TABLE_GAME = "game";
@@ -33,15 +37,16 @@ public class DBHelper extends SQLiteOpenHelper
 
     public static final String STATE = "state";
     public static final String SCORE = "score";
-    public static final String IS_ENDED = "isEnded";
+    public static final String IS_WIN = "isWin";
+    public static final String IS_LOSE = "isLose";
     public static final String USER_LOGIN = "user_login";
 
     private final String CREATE_USER_TABLE = "CREATE TABLE " + TABLE_ACCOUNTS + "(" + LOGIN +
             " VARCHAR(30) PRIMARY KEY," + PASSWORD + " VARCHAR(50)," + PHOTO  + " BLOB" + ")";
 
     private final String CREATE_GAME_TABLE = "CREATE TABLE " + TABLE_GAME + "(" + SCORE +
-            " INTEGER NOT NULL," + STATE + " VARCHAR(20)," + IS_ENDED + " INTEGER NOT NULL," +
-            USER_LOGIN + " VARCHAR(30)," +
+            " INTEGER NOT NULL," + STATE + " VARCHAR(20)," + IS_WIN + " INTEGER NOT NULL," +
+            IS_LOSE + " INTEGER NOT NULL," + USER_LOGIN + " VARCHAR(30)," +
             "FOREIGN KEY" + "(" + USER_LOGIN + ")" + " REFERENCES " + TABLE_ACCOUNTS + "(" + LOGIN + ")" + ")";
 
     public DBHelper(@Nullable Context context)
@@ -86,19 +91,23 @@ public class DBHelper extends SQLiteOpenHelper
         return false;
     }
 
-    public void createAccount(SQLiteDatabase database, String login, String password)
+    public void createAccount(SQLiteDatabase database, String login, String password, Context context)
     {
         ContentValues contentValues = new ContentValues();
+        Bitmap photo = BitmapFactory.decodeResource(context.getResources(), R.drawable.user);
+        byte[] data = getBitmapAsByteArray(photo);
 
         contentValues.put(LOGIN, login);
         contentValues.put(PASSWORD, password);
+        contentValues.put(PHOTO, data);
 
         database.insert(TABLE_ACCOUNTS, null, contentValues);
         contentValues.clear();
 
         contentValues.put(SCORE, 0);
         contentValues.put(STATE, "");
-        contentValues.put(IS_ENDED, "0");
+        contentValues.put(IS_LOSE, "0");
+        contentValues.put(IS_WIN, "0");
         contentValues.put(USER_LOGIN, login);
 
         database.insert(TABLE_GAME, null, contentValues);
@@ -116,7 +125,7 @@ public class DBHelper extends SQLiteOpenHelper
 
     public static Pair<int[][], Integer> loadGameState(SQLiteDatabase database, String login)
     {
-        Cursor cursor = database.query(DBHelper.TABLE_GAME, null, "user_login=" + "'" + login + "'" + " AND " + "isEnded=0", null, null, null, null);
+        Cursor cursor = database.query(DBHelper.TABLE_GAME, null, "user_login=" + "'" + login + "'" + " AND " + "isLose=0" + " AND " + " isWin=0", null, null, null, null);
         String state="";
         int score=0;
         if(cursor.moveToFirst())
@@ -162,19 +171,105 @@ public class DBHelper extends SQLiteOpenHelper
         {
             int scoreIndex = cursor.getColumnIndex(SCORE);
             int stateIndex = cursor.getColumnIndex(STATE);
-            int endedIndex = cursor.getColumnIndex(IS_ENDED);
+            int wonIndex = cursor.getColumnIndex(IS_WIN);
+            int lostIndex = cursor.getColumnIndex(IS_LOSE);
             int loginIndex = cursor.getColumnIndex(USER_LOGIN);
             do
             {
                 String login = cursor.getString(loginIndex);
                 String score = cursor.getString(scoreIndex);
                 String state = cursor.getString(stateIndex);
-                String ended = cursor.getString(endedIndex);
-                Log.d("huj", "Login: " + login + " Score: " + score + " State: " + state + " isEnded: " + ended);
+                String wined = cursor.getString(wonIndex);
+                String lost = cursor.getString(lostIndex);
+                Log.d("select", "Login: " + login + " State: " + state + " Score: " + score + " Wined: " + wined + " Lost: " + lost);
             }
             while(cursor.moveToNext());
         }
         cursor.close();
+    }
+
+    private static byte[] getBitmapAsByteArray(Bitmap bitmap)
+    {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
+        return outputStream.toByteArray();
+    }
+
+    public static Bitmap getImage(SQLiteDatabase database, String loginIn)
+    {
+        Cursor cursor = database.query(TABLE_ACCOUNTS, null, null, null, null, null, null);
+
+        if(cursor.moveToFirst())
+        {
+            int loginIndex = cursor.getColumnIndex(LOGIN);
+            int photoIndex = cursor.getColumnIndex(PHOTO);
+            do
+            {
+                String login = cursor.getString(loginIndex);
+                byte[] photo = cursor.getBlob(photoIndex);
+
+                if(loginIn.equals(login))
+                    return BitmapFactory.decodeByteArray(photo, 0, photo.length);;
+            }
+            while(cursor.moveToNext());
+        }
+        cursor.close();
+        return null;
+    }
+
+    public static void updateUserPhoto(SQLiteDatabase database, String login, Bitmap bitmap)
+    {
+        ContentValues contentValues = new ContentValues();
+        byte[] data = getBitmapAsByteArray(bitmap);
+
+        contentValues.put(PHOTO, data);
+
+        database.update(TABLE_ACCOUNTS, contentValues, LOGIN + "=" + "'" + login + "'", null);
+    }
+
+    public static Pair<Integer, Integer> selectGamesResult(SQLiteDatabase database, String loginIn)
+    {
+        Cursor cursor = database.query(TABLE_GAME, null, null, null, null, null, null);
+        int maxScore = 0;
+        int count = 0;
+
+        if(cursor.moveToFirst())
+        {
+            int loginIndex = cursor.getColumnIndex(USER_LOGIN);
+            int scoreIndex = cursor.getColumnIndex(SCORE);
+            int isLostIndex = cursor.getColumnIndex(IS_LOSE);
+            int isWonIndex = cursor.getColumnIndex(IS_WIN);
+            do
+            {
+                String login = cursor.getString(loginIndex);
+                int score = cursor.getInt(scoreIndex);
+                int lost = cursor.getInt(isLostIndex);
+                int won = cursor.getInt(isWonIndex);
+
+                if(loginIn.equals(login) && lost==0 && won==1)
+                {
+                    if(score>maxScore)
+                        maxScore = score;
+                    count++;
+                }
+
+            }
+            while(cursor.moveToNext());
+        }
+        cursor.close();
+        return new Pair<>(maxScore, count);
+    }
+
+    public static void insert(SQLiteDatabase database, String login)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(USER_LOGIN, login);
+        contentValues.put(SCORE, 456);
+        contentValues.put(IS_LOSE, 0);
+        contentValues.put(IS_WIN, 1);
+        contentValues.put(STATE, "");
+
+        database.insert(TABLE_GAME, null, contentValues);
     }
 
 }
