@@ -13,7 +13,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".changeLoginDialog"></activity>
         <activity android:name=".AccountSettingsActivity" />
         <activity android:name=".LeaderBoardActivity" />
         <activity android:name=".MainMenuActivity" />

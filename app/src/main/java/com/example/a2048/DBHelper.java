@@ -69,7 +69,7 @@ public class DBHelper extends SQLiteOpenHelper
         onCreate(db);
     }
 
-    public boolean loginExists(SQLiteDatabase database, String loginIn, String passwordIn)
+    public static boolean loginExists(SQLiteDatabase database, String loginIn, String passwordIn)
     {
         Cursor cursor = database.query(TABLE_ACCOUNTS, null, null, null, null, null, null);
 
@@ -227,6 +227,28 @@ public class DBHelper extends SQLiteOpenHelper
         database.update(TABLE_ACCOUNTS, contentValues, LOGIN + "=" + "'" + login + "'", null);
     }
 
+    public static void updateUserLogin(SQLiteDatabase database, String oldLogin, String newLogin)
+    {
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(LOGIN, newLogin);
+
+        database.update(TABLE_ACCOUNTS, contentValues, LOGIN + "=" + "'" + oldLogin + "'", null);
+        contentValues.clear();
+
+        contentValues.put(USER_LOGIN, newLogin);
+        database.update(TABLE_GAME, contentValues, USER_LOGIN + "=" + "'" + oldLogin + "'", null);
+    }
+
+    public static void updateUserPassword(SQLiteDatabase database, String loginIn, String newPassword)
+    {
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(PASSWORD, newPassword);
+
+        database.update(TABLE_ACCOUNTS, contentValues, LOGIN + "=" + "'" + loginIn + "'", null);
+    }
+
     public static Pair<Integer, Integer> selectGamesResult(SQLiteDatabase database, String loginIn)
     {
         Cursor cursor = database.query(TABLE_GAME, null, null, null, null, null, null);
@@ -271,5 +293,7 @@ public class DBHelper extends SQLiteOpenHelper
 
         database.insert(TABLE_GAME, null, contentValues);
     }
+
+
 
 }

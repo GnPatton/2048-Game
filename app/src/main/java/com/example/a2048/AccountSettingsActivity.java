@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 
 import android.database.Cursor;
@@ -17,6 +18,8 @@ import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -145,5 +148,88 @@ public class AccountSettingsActivity extends Activity
     public void saveChanges(View view)
     {
         DBHelper.updateUserPhoto(database, login, bitmap);
+    }
+
+    public void changeLogin(View view)
+    {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dView = getLayoutInflater().inflate(R.layout.dialog_change_login, null);
+        final EditText loginEdit = dView.findViewById(R.id.loginChangeEditText);
+        Button cancelButton = dView.findViewById(R.id.cancelButton);
+        Button okButton = dView.findViewById(R.id.okButton);
+        loginEdit.setText(login);
+
+        builder.setView(dView);
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+
+        okButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if(!loginEdit.getText().toString().isEmpty() && !loginEdit.getText().toString().equals(login))
+                {
+                    DBHelper.updateUserLogin(database, login, loginEdit.getText().toString());
+                    loginText.setText(loginEdit.getText().toString());
+                    dialog.dismiss();
+                }
+                else
+                    Toast.makeText(AccountSettingsActivity.this, "Input new login!", Toast.LENGTH_LONG).show();
+            }
+        });
+        cancelButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                dialog.dismiss();
+            }
+        });
+    }
+
+
+    public void changePassword(View view)
+    {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dView = getLayoutInflater().inflate(R.layout.dialog_change_password, null);
+        final EditText oldPasswordEdit = dView.findViewById(R.id.oldPasswordChangeEditText);
+        final EditText newPasswordEdit = dView.findViewById(R.id.newPasswordChangeEditText);
+        final EditText repeatNewPasswordEdit = dView.findViewById(R.id.newPasswordRepeatChangeEditText);
+        Button cancelButton = dView.findViewById(R.id.cancelButtonPassword);
+        Button okButton = dView.findViewById(R.id.okButtonPassword);
+
+        builder.setView(dView);
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+
+        okButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if(!oldPasswordEdit.getText().toString().isEmpty() && !newPasswordEdit.getText().toString().isEmpty())
+                {
+                    if(DBHelper.loginExists(database, login, oldPasswordEdit.getText().toString()))
+                        if(newPasswordEdit.getText().toString().equals(repeatNewPasswordEdit.getText().toString()))
+                        {
+                            DBHelper.updateUserPassword(database, login, newPasswordEdit.getText().toString());
+                            dialog.dismiss();
+                        }
+                        else
+                            Toast.makeText(AccountSettingsActivity.this, "Passwords don't match!", Toast.LENGTH_SHORT).show();
+                    else
+                        Toast.makeText(AccountSettingsActivity.this, "Wrong password!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        cancelButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                dialog.dismiss();
+            }
+        });
     }
 }
