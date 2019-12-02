@@ -16,6 +16,9 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -69,7 +72,7 @@ public class DBHelper extends SQLiteOpenHelper
         onCreate(db);
     }
 
-    public static boolean loginExists(SQLiteDatabase database, String loginIn, String passwordIn)
+    public boolean loginExists(SQLiteDatabase database, String loginIn, String passwordIn)
     {
         Cursor cursor = database.query(TABLE_ACCOUNTS, null, null, null, null, null, null);
 
@@ -188,14 +191,14 @@ public class DBHelper extends SQLiteOpenHelper
         cursor.close();
     }
 
-    private static byte[] getBitmapAsByteArray(Bitmap bitmap)
+    private byte[] getBitmapAsByteArray(Bitmap bitmap)
     {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
         return outputStream.toByteArray();
     }
 
-    public static Bitmap getImage(SQLiteDatabase database, String loginIn)
+    public Bitmap getImage(SQLiteDatabase database, String loginIn)
     {
         Cursor cursor = database.query(TABLE_ACCOUNTS, null, null, null, null, null, null);
 
@@ -209,7 +212,7 @@ public class DBHelper extends SQLiteOpenHelper
                 byte[] photo = cursor.getBlob(photoIndex);
 
                 if(loginIn.equals(login))
-                    return BitmapFactory.decodeByteArray(photo, 0, photo.length);;
+                    return BitmapFactory.decodeByteArray(photo, 0, photo.length);
             }
             while(cursor.moveToNext());
         }
@@ -217,7 +220,7 @@ public class DBHelper extends SQLiteOpenHelper
         return null;
     }
 
-    public static void updateUserPhoto(SQLiteDatabase database, String login, Bitmap bitmap)
+    public void updateUserPhoto(SQLiteDatabase database, String login, Bitmap bitmap)
     {
         ContentValues contentValues = new ContentValues();
         byte[] data = getBitmapAsByteArray(bitmap);
@@ -227,7 +230,7 @@ public class DBHelper extends SQLiteOpenHelper
         database.update(TABLE_ACCOUNTS, contentValues, LOGIN + "=" + "'" + login + "'", null);
     }
 
-    public static void updateUserLogin(SQLiteDatabase database, String oldLogin, String newLogin)
+    public void updateUserLogin(SQLiteDatabase database, String oldLogin, String newLogin)
     {
         ContentValues contentValues = new ContentValues();
 
@@ -240,7 +243,7 @@ public class DBHelper extends SQLiteOpenHelper
         database.update(TABLE_GAME, contentValues, USER_LOGIN + "=" + "'" + oldLogin + "'", null);
     }
 
-    public static void updateUserPassword(SQLiteDatabase database, String loginIn, String newPassword)
+    public void updateUserPassword(SQLiteDatabase database, String loginIn, String newPassword)
     {
         ContentValues contentValues = new ContentValues();
 
@@ -249,7 +252,7 @@ public class DBHelper extends SQLiteOpenHelper
         database.update(TABLE_ACCOUNTS, contentValues, LOGIN + "=" + "'" + loginIn + "'", null);
     }
 
-    public static Pair<Integer, Integer> selectGamesResult(SQLiteDatabase database, String loginIn)
+    public Pair<Integer, Integer> selectGamesResult(SQLiteDatabase database, String loginIn)
     {
         Cursor cursor = database.query(TABLE_GAME, null, null, null, null, null, null);
         int maxScore = 0;
@@ -282,11 +285,11 @@ public class DBHelper extends SQLiteOpenHelper
         return new Pair<>(maxScore, count);
     }
 
-    public static void insert(SQLiteDatabase database, String login)
+    public void insert(SQLiteDatabase database, String login)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put(USER_LOGIN, login);
-        contentValues.put(SCORE, 456);
+        contentValues.put(SCORE, 1200);
         contentValues.put(IS_LOSE, 0);
         contentValues.put(IS_WIN, 1);
         contentValues.put(STATE, "");
@@ -294,6 +297,29 @@ public class DBHelper extends SQLiteOpenHelper
         database.insert(TABLE_GAME, null, contentValues);
     }
 
+    public ArrayList<User> selectLeaderBoard(SQLiteDatabase database)
+    {
+        ArrayList<User> users = new ArrayList<>();
+        Cursor cursor = database.rawQuery("SELECT ut.login, ut.photo, MAX(gm.score) as" + "'" + "Max" + "'" +
+        "FROM game gm JOIN user ut ON gm.user_login = ut.login GROUP BY ut.login ORDER BY Max DESC", null);
+        if(cursor.moveToFirst())
+        {
+            while (!cursor.isAfterLast())
+            {
+                int loginIndex = cursor.getColumnIndex(LOGIN);
+                int photoIndex = cursor.getColumnIndex(PHOTO);
+                int maxIndex = cursor.getColumnIndex("Max");
+                String login = cursor.getString(loginIndex);
+                byte[] photo = cursor.getBlob(photoIndex);
+                int max = cursor.getInt(maxIndex);
 
+                users.add(new User(login, photo, max));
+
+                cursor.moveToNext();
+            }
+        }
+        cursor.close();
+        return users;
+    }
 
 }
