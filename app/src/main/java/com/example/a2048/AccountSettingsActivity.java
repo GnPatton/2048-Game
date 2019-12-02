@@ -34,6 +34,7 @@ public class AccountSettingsActivity extends Activity
     Bitmap bitmap;
 
     private final int GALLERY_REQUEST_CODE = 100;
+    private final int REQUEST_IMAGE_CAPTURE = 200;
     ImageView imageView;
     TextView loginText;
     TextView bestScoreText;
@@ -50,7 +51,7 @@ public class AccountSettingsActivity extends Activity
         database = dbHelper.getReadableDatabase();
 
         login = getIntent().getExtras().getString("login", "");
-        Pair<Integer, Integer> games = DBHelper.selectGamesResult(database, login);
+        Pair<Integer, Integer> games = dbHelper.selectGamesResult(database, login);
 
         imageView = findViewById(R.id.imageView);
         loginText = findViewById(R.id.loginSettingsText);
@@ -61,7 +62,7 @@ public class AccountSettingsActivity extends Activity
         bestScoreText.setText("Best score: " + games.first);
         gamePlayedText.setText("Game played: " + games.second);
 
-        Bitmap img = DBHelper.getImage(database, login);
+        Bitmap img = dbHelper.getImage(database, login);
         imageView.setImageBitmap(img);
 
         registerForContextMenu(imageView);
@@ -70,13 +71,10 @@ public class AccountSettingsActivity extends Activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)
     {
-        //super.onActivityResult(requestCode, resultCode, data);
-        // Result code is RESULT_OK only if the user selects an Image
         if (resultCode==Activity.RESULT_OK)
             switch (requestCode)
             {
                 case GALLERY_REQUEST_CODE:
-                    //data.getData returns the content URI for the selected Image
                     Uri selectedImage = data.getData();
                     MIME = getMimeType(selectedImage);
                     try
@@ -87,8 +85,14 @@ public class AccountSettingsActivity extends Activity
                     {
                         e.printStackTrace();
                     }
-                    Toast.makeText(this, MIME, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(this, MIME, Toast.LENGTH_SHORT).show();
                     imageView.setImageURI(selectedImage);
+                    break;
+
+                case REQUEST_IMAGE_CAPTURE:
+                    Bundle extras = data.getExtras();
+                    bitmap = (Bitmap) extras.get("data");
+                    imageView.setImageBitmap(bitmap);
                     break;
             }
     }
@@ -111,8 +115,7 @@ public class AccountSettingsActivity extends Activity
         }
         else
         {
-            Toast.makeText(this, "todo", Toast.LENGTH_SHORT).show();
-            return false;
+            pickImageFromCamera();
         }
         return true;
     }
@@ -142,12 +145,17 @@ public class AccountSettingsActivity extends Activity
 
     private void pickImageFromCamera()
     {
+        Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
+        if(takePhotoIntent.resolveActivity(getPackageManager()) != null)
+        {
+            startActivityForResult(takePhotoIntent, REQUEST_IMAGE_CAPTURE);
+        }
     }
 
     public void saveChanges(View view)
     {
-        DBHelper.updateUserPhoto(database, login, bitmap);
+        dbHelper.updateUserPhoto(database, login, bitmap);
     }
 
     public void changeLogin(View view)
@@ -170,7 +178,7 @@ public class AccountSettingsActivity extends Activity
             {
                 if(!loginEdit.getText().toString().isEmpty() && !loginEdit.getText().toString().equals(login))
                 {
-                    DBHelper.updateUserLogin(database, login, loginEdit.getText().toString());
+                    dbHelper.updateUserLogin(database, login, loginEdit.getText().toString());
                     loginText.setText(loginEdit.getText().toString());
                     dialog.dismiss();
                 }
@@ -210,10 +218,10 @@ public class AccountSettingsActivity extends Activity
             {
                 if(!oldPasswordEdit.getText().toString().isEmpty() && !newPasswordEdit.getText().toString().isEmpty())
                 {
-                    if(DBHelper.loginExists(database, login, oldPasswordEdit.getText().toString()))
+                    if(dbHelper.loginExists(database, login, oldPasswordEdit.getText().toString()))
                         if(newPasswordEdit.getText().toString().equals(repeatNewPasswordEdit.getText().toString()))
                         {
-                            DBHelper.updateUserPassword(database, login, newPasswordEdit.getText().toString());
+                            dbHelper.updateUserPassword(database, login, newPasswordEdit.getText().toString());
                             dialog.dismiss();
                         }
                         else
