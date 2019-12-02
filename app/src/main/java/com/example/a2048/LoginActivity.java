@@ -14,7 +14,6 @@ import android.widget.Toast;
 
 public class LoginActivity extends Activity
 {
-    public static final int REGISTRATION_ACTIVITY_CODE = 1;
     private DBHelper dbHelper;
     SQLiteDatabase database;
 
@@ -40,6 +39,7 @@ public class LoginActivity extends Activity
         dbHelper = new DBHelper(this);
 
         database = dbHelper.getReadableDatabase();
+        //dbHelper.insert(database, "kek");
         dbHelper.selectAll(database);
 
         String savedLogin = loadData("LOGIN");

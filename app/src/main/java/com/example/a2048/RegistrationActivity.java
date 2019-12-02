@@ -48,7 +48,7 @@ public class RegistrationActivity extends AppCompatActivity
             {
                 if(!dbHelper.loginExists(database, login, password))
                 {
-                    dbHelper.createAccount(database, loginEditText.getText().toString(), passwordEditText.getText().toString());
+                    dbHelper.createAccount(database, loginEditText.getText().toString(), passwordEditText.getText().toString(), getApplicationContext());
                     finish();
                 }
                 else

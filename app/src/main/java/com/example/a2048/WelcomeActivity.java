@@ -21,4 +21,10 @@ public class WelcomeActivity extends Activity
         Intent loginPage = new Intent(getApplicationContext(), LoginActivity.class);
         startActivity(loginPage);
     }
+
+    public void leaderBoard(View view)
+    {
+        Intent leaderBoard = new Intent(getApplicationContext(), LeaderBoardActivity.class);
+        startActivity(leaderBoard);
+    }
 }

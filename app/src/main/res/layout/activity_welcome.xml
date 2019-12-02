@@ -51,7 +51,7 @@
             android:textSize="20sp"
             android:background="@color/colorMainDark"
             android:text="Leaderboard"
-            android:onClick="login"/>
+            android:onClick="leaderBoard"/>
     </LinearLayout>
 
 </LinearLayout>

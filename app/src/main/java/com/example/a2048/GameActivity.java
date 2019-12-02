@@ -32,7 +32,7 @@ public class GameActivity extends Activity implements GestureDetector.OnGestureL
         boolean isNewGame = Boolean.valueOf(getIntent().getExtras().get("isNewGame").toString());
         login = getIntent().getExtras().getString("login");
 
-        field = new Field(isNewGame, login, database);
+        field = new Field(getApplicationContext(), isNewGame, login, database);
 
         scoreText = findViewById(R.id.scoreText);
         titleText = findViewById(R.id.titleText);
@@ -68,7 +68,7 @@ public class GameActivity extends Activity implements GestureDetector.OnGestureL
 
     public void restart(View view)
     {
-        titleText.setTextSize(60);
+        titleText.setTextSize(75);
         titleText.setText("2048");
         field.reset();
         refresh();
@@ -92,7 +92,7 @@ public class GameActivity extends Activity implements GestureDetector.OnGestureL
                     for(int j=0; j<4; j++)
                     {
                         builder.append(field.getState(i, j));
-                        if(i==3 && j== 3)
+                        if(i==3 && j==3)
                             break;
                         else
                             builder.append(",");

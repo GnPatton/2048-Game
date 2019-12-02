@@ -46,4 +46,11 @@ public class MainMenuActivity extends Activity
         game.putExtra("isNewGame", "false");
         startActivity(game);
     }
+
+    public void settings(View view)
+    {
+        Intent settings = new Intent(getApplicationContext(), AccountSettingsActivity.class);
+        settings.putExtra("login", login);
+        startActivity(settings);
+    }
 }
