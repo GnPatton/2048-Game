@@ -1,5 +1,6 @@
 package com.example.a2048;
 
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Pair;
 
@@ -7,13 +8,15 @@ import java.util.Random;
 
 public class Field
 {
+    Sound sound;
     private int score = 0;
     private int previousStateScore = 0;
     private int[][] field;
     private int[][] previousStateField;
 
-    public Field(boolean isNewGame, String login, SQLiteDatabase database)
+    public Field(Context context, boolean isNewGame, String login, SQLiteDatabase database)
     {
+        sound = new Sound(context);
         field = new int[4][4];
         previousStateField = new int[4][4];
 
@@ -157,193 +160,225 @@ public class Field
          return true;
     }
 
+    private boolean isWon()
+    {
+        for(int i=0; i<3; i++)
+            for(int j=0; j<4; j++)
+                if(field[i][j] == 2048)
+                    return true;
+        return false;
+    }
+
     public void shift(Direction direction)
     {
         copy();
         boolean hasChange = false;
+        boolean hasMerge = false;
 
-        if(!isGameOver())
-        {
-            switch(direction)
+        if(!isWon())
+            if(!isGameOver())
             {
-                case RIGHT:
-                    for(int i=0; i<4; i++)
-                    {
-                        for(int j=3; j>0; j--)
+                switch(direction)
+                {
+                    case RIGHT:
+                        for(int i=0; i<4; i++)
                         {
-                            for(int k=0; k<4; k++)
+                            for(int j=3; j>0; j--)
                             {
-                                if(k<3)
+                                for(int k=0; k<4; k++)
                                 {
-                                    if (field[i][k]!=0 && field[i][k+1]==0)
+                                    if(k<3)
                                     {
-                                        int buff;
-                                        buff = field[i][k];
-                                        field[i][k] = field[i][k+1];
-                                        field[i][k+1] = buff;
-                                        hasChange = true;
-                                        k=0;
+                                        if (field[i][k]!=0 && field[i][k+1]==0)
+                                        {
+                                            int buff;
+                                            buff = field[i][k];
+                                            field[i][k] = field[i][k+1];
+                                            field[i][k+1] = buff;
+                                            hasChange = true;
+                                            k=0;
+                                        }
                                     }
-                                }
-                                else if(k==3)
-                                {
-                                    if(field[i][k] == field[i][k-1] && field[i][k]!=0)
+                                    else if(k==3)
                                     {
-                                        field[i][k] *= 2;
-                                        field[i][k-1] = 0;
-                                        hasChange = true;
-                                        score += field[i][k];
+                                        if(field[i][k] == field[i][k-1] && field[i][k]!=0)
+                                        {
+                                            field[i][k] *= 2;
+                                            field[i][k-1] = 0;
+                                            hasChange = true;
+                                            hasMerge = true;
+                                            score += field[i][k];
+                                        }
                                     }
-                                }
 
-                                if(field[i][j] == field[i][j-1] && field[i][j] != 0)
-                                {
-                                    field[i][j] *= 2;
-                                    field[i][j-1] = 0;
-                                    score += field[i][j];
-                                    j=3;
-                                    hasChange = true;
+                                    if(field[i][j] == field[i][j-1] && field[i][j] != 0)
+                                    {
+                                        field[i][j] *= 2;
+                                        field[i][j-1] = 0;
+                                        score += field[i][j];
+                                        j=3;
+                                        hasChange = true;
+                                        hasMerge = true;
+                                    }
                                 }
                             }
                         }
-                    }
-                    break;
+                        break;
 
-                case LEFT:
-                    for(int i=0; i<4; i++)
-                    {
-                        for(int j=0; j<3; j++)
+                    case LEFT:
+                        for(int i=0; i<4; i++)
                         {
-                            for(int k=3; k>=0; k--)
+                            for(int j=0; j<3; j++)
                             {
-                                if(k>0)
+                                for(int k=3; k>=0; k--)
                                 {
-                                    if (field[i][k]!=0 && field[i][k-1]==0)
+                                    if(k>0)
                                     {
-                                        int buff;
-                                        buff = field[i][k];
-                                        field[i][k] = field[i][k-1];
-                                        field[i][k-1] = buff;
-                                        hasChange = true;
-                                        k=3;
+                                        if (field[i][k]!=0 && field[i][k-1]==0)
+                                        {
+                                            int buff;
+                                            buff = field[i][k];
+                                            field[i][k] = field[i][k-1];
+                                            field[i][k-1] = buff;
+                                            hasChange = true;
+                                            k=3;
+                                        }
                                     }
-                                }
-                                else if(k==0)
-                                {
-                                    if(field[i][k] == field[i][k+1] && field[i][k]!=0)
+                                    else if(k==0)
                                     {
-                                        field[i][k] *= 2;
-                                        field[i][k+1] = 0;
+                                        if(field[i][k] == field[i][k+1] && field[i][k]!=0)
+                                        {
+                                            field[i][k] *= 2;
+                                            field[i][k+1] = 0;
+                                            hasChange = true;
+                                            hasMerge = true;
+                                            score += field[i][k];
+                                        }
+                                    }
+
+                                    if(field[i][j] == field[i][j+1] && field[i][j+1] != 0)
+                                    {
+                                        field[i][j] *= 2;
+                                        field[i][j+1] = 0;
+                                        score += field[i][j];
+                                        j=0;
                                         hasChange = true;
-                                        score += field[i][k];
+                                        hasMerge = true;
                                     }
                                 }
 
-                                if(field[i][j] == field[i][j+1] && field[i][j+1] != 0)
+                            }
+                        }
+                        break;
+
+                    case UP:
+                        for(int i=0; i<4; i++)
+                        {
+                            for(int j=0; j<3; j++)
+                            {
+                                for(int k=0; k<4; k++)
                                 {
-                                    field[i][j] *= 2;
-                                    field[i][j+1] = 0;
-                                    score += field[i][j];
-                                    j=0;
-                                    hasChange = true;
+                                    if(k<3)
+                                    {
+                                        if (field[k][i]==0 && field[k+1][i]!=0)
+                                        {
+                                            int buff;
+                                            buff = field[k][i];
+                                            field[k][i] = field[k+1][i];
+                                            field[k+1][i] = buff;
+                                            hasChange = true;
+                                            k=-1;
+                                        }
+                                    }
+                                    else if(k==3)
+                                    {
+                                        if(field[k][i] == field[k-1][i] && field[k][i]!=0)
+                                        {
+                                            field[k][i] *= 2;
+                                            field[k-1][i] = 0;
+                                            hasChange = true;
+                                            hasMerge = true;
+                                            score += field[k][i];
+                                        }
+                                    }
+
+                                    if(field[j][i] == field[j+1][i] && field[j+1][i] != 0)
+                                    {
+                                        field[j][i] *= 2;
+                                        field[j+1][i] = 0;
+                                        score += field[j][i];
+                                        j=0;
+                                        hasChange = true;
+                                        hasMerge = true;
+                                    }
+                                }
+
+                            }
+                        }
+                        break;
+
+                    case DOWN:
+                        for(int i=0; i<4; i++)
+                        {
+                            for(int j=0; j<3; j++)
+                            {
+                                for(int k=3; k>=0; k--)
+                                {
+                                    if(k>0)
+                                    {
+                                        if (field[k][i]==0 && field[k-1][i]!=0)
+                                        {
+                                            int buff;
+                                            buff = field[k][i];
+                                            field[k][i] = field[k-1][i];
+                                            field[k-1][i] = buff;
+                                            hasChange = true;
+                                            k=3;
+                                        }
+                                    }
+                                    else if(k==0)
+                                    {
+                                        if(field[k][i] == field[k+1][i] && field[k][i]!=0)
+                                        {
+                                            field[k][i] *= 2;
+                                            field[k+1][i] = 0;
+                                            hasChange = true;
+                                            hasMerge = true;
+                                            score += field[k][i];
+                                        }
+                                    }
+
+                                    if(field[j][i] == field[j+1][i] && field[j+1][i] != 0)
+                                    {
+                                        field[j][i] *= 2;
+                                        field[j+1][i] = 0;
+                                        score += field[j][i];
+                                        j=0;
+                                        hasChange = true;
+                                        hasMerge = true;
+                                    }
                                 }
                             }
-
                         }
-                    }
-                    break;
+                        break;
+                }
 
-                case UP:
-                    for(int i=0; i<4; i++)
-                    {
-                        for(int j=0; j<3; j++)
-                        {
-                            for(int k=0; k<4; k++)
-                            {
-                                if(k<3)
-                                {
-                                    if (field[k][i]==0 && field[k+1][i]!=0)
-                                    {
-                                        int buff;
-                                        buff = field[k][i];
-                                        field[k][i] = field[k+1][i];
-                                        field[k+1][i] = buff;
-                                        hasChange = true;
-                                        k=-1;
-                                    }
-                                }
-                                else if(k==3)
-                                {
-                                    if(field[k][i] == field[k-1][i] && field[k][i]!=0)
-                                    {
-                                        field[k][i] *= 2;
-                                        field[k-1][i] = 0;
-                                        hasChange = true;
-                                        score += field[k][i];
-                                    }
-                                }
+                if(hasChange)
+                    generateNewCell();
 
-                                if(field[j][i] == field[j+1][i] && field[j+1][i] != 0)
-                                {
-                                    field[j][i] *= 2;
-                                    field[j+1][i] = 0;
-                                    score += field[j][i];
-                                    j=0;
-                                    hasChange = true;
-                                }
-                            }
+                if(hasMerge)
+                    sound.playMerge();
 
-                        }
-                    }
-                    break;
+                if(hasChange && !hasMerge)
+                    sound.playSwipe();
 
-                case DOWN:
-                    for(int i=0; i<4; i++)
-                    {
-                        for(int j=0; j<3; j++)
-                        {
-                            for(int k=3; k>=0; k--)
-                            {
-                                if(k>0)
-                                {
-                                    if (field[k][i]==0 && field[k-1][i]!=0)
-                                    {
-                                        int buff;
-                                        buff = field[k][i];
-                                        field[k][i] = field[k-1][i];
-                                        field[k-1][i] = buff;
-                                        hasChange = true;
-                                        k=3;
-                                    }
-                                }
-                                else if(k==0)
-                                {
-                                    if(field[k][i] == field[k+1][i] && field[k][i]!=0)
-                                    {
-                                        field[k][i] *= 2;
-                                        field[k+1][i] = 0;
-                                        hasChange = true;
-                                        score += field[k][i];
-                                    }
-                                }
-
-                                if(field[j][i] == field[j+1][i] && field[j+1][i] != 0)
-                                {
-                                    field[j][i] *= 2;
-                                    field[j+1][i] = 0;
-                                    score += field[j][i];
-                                    j=0;
-                                    hasChange = true;
-                                }
-                            }
-
-                        }
-                    }
-                    break;
+                if(isWon())
+                    sound.playWin();
             }
-            if(hasChange)
-                generateNewCell();
-        }
+            else
+                sound.playLose();
+            else
+                sound.playWin();
     }
 }
 
