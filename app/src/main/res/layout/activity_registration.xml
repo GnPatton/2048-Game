@@ -69,24 +69,6 @@
         android:onClick="confirm"/>
 
     <TextView
-        android:id="@+id/orText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|center_vertical"
-        android:gravity="center_vertical|center_horizontal"
-        android:layout_marginTop="5dp"
-        android:text="or"
-        android:textSize="20sp"/>
-
-    <Button
-        android:id="@+id/googleButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="10dp"
-        android:text="Sign up using Google account" />
-
-    <TextView
         android:id="@+id/errorText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

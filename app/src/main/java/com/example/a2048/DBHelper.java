@@ -2,8 +2,6 @@ package com.example.a2048;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -11,16 +9,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.util.Pair;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
 import java.io.ByteArrayOutputStream;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
 
-import static android.content.Context.MODE_PRIVATE;
 
 public class DBHelper extends SQLiteOpenHelper
 {
@@ -94,10 +88,16 @@ public class DBHelper extends SQLiteOpenHelper
         return false;
     }
 
-    public void createAccount(SQLiteDatabase database, String login, String password, Context context)
+    public void createAccount(SQLiteDatabase database, String login, String password, Context context, @Nullable Bitmap image)
     {
         ContentValues contentValues = new ContentValues();
-        Bitmap photo = BitmapFactory.decodeResource(context.getResources(), R.drawable.user);
+        Bitmap photo;
+
+        if(image == null)
+            photo = BitmapFactory.decodeResource(context.getResources(), R.drawable.user);
+        else
+            photo = image;
+
         byte[] data = getBitmapAsByteArray(photo);
 
         contentValues.put(LOGIN, login);
@@ -320,6 +320,12 @@ public class DBHelper extends SQLiteOpenHelper
         }
         cursor.close();
         return users;
+    }
+
+    public void deleteUser(SQLiteDatabase database, String login)
+    {
+        database.execSQL("DELETE FROM " + TABLE_ACCOUNTS + " WHERE " + LOGIN + "=" + "'" + login + "'");
+        database.execSQL("DELETE FROM " + TABLE_GAME + " WHERE " + USER_LOGIN + "=" + "'" + login + "'");
     }
 
 }

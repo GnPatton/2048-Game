@@ -155,7 +155,8 @@ public class AccountSettingsActivity extends Activity
 
     public void saveChanges(View view)
     {
-        dbHelper.updateUserPhoto(database, login, bitmap);
+        if(bitmap != null)
+            dbHelper.updateUserPhoto(database, login, bitmap);
     }
 
     public void changeLogin(View view)
