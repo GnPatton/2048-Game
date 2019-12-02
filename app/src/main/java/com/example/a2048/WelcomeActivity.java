@@ -2,13 +2,11 @@ package com.example.a2048;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 
 public class WelcomeActivity extends Activity
 {
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {

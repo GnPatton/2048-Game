@@ -2,7 +2,6 @@ package com.example.a2048;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
@@ -48,7 +47,7 @@ public class RegistrationActivity extends AppCompatActivity
             {
                 if(!dbHelper.loginExists(database, login, password))
                 {
-                    dbHelper.createAccount(database, loginEditText.getText().toString(), passwordEditText.getText().toString(), getApplicationContext());
+                    dbHelper.createAccount(database, loginEditText.getText().toString(), passwordEditText.getText().toString(), getApplicationContext(), null);
                     finish();
                 }
                 else
