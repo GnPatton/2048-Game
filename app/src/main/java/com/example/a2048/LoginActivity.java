@@ -27,6 +27,7 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
@@ -137,6 +138,7 @@ public class LoginActivity extends Activity
             else
                 mainMenu.putExtra("hasGame", true);
 
+            LoginManager.getInstance().logOut();
             startActivity(mainMenu);
         }
         else
@@ -178,7 +180,7 @@ public class LoginActivity extends Activity
         {
             if(currentAccessToken==null)
             {
-                Toast.makeText(LoginActivity.this, "Log out", Toast.LENGTH_SHORT).show();
+                Log.d("facebook", "Log out");
             }
             else
             {

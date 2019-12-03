@@ -2,13 +2,14 @@ package com.example.a2048;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class RegistrationActivity extends AppCompatActivity
+public class RegistrationActivity extends Activity
 {
     private DBHelper dbHelper;
 

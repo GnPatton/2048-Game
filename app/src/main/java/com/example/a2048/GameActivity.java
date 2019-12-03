@@ -1,6 +1,7 @@
 package com.example.a2048;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.GestureDetector;
@@ -34,6 +35,9 @@ public class GameActivity extends Activity implements GestureDetector.OnGestureL
 
         field = new Field(getApplicationContext(), isNewGame, login, database);
 
+        if(isNewGame)
+            dbHelper.createGame(database, login, true, 0);
+
         scoreText = findViewById(R.id.scoreText);
         titleText = findViewById(R.id.titleText);
         squares = new ImageView[4][4];
@@ -66,11 +70,12 @@ public class GameActivity extends Activity implements GestureDetector.OnGestureL
         scoreText.setText(field.displayScore());
     }
 
+
     public void restart(View view)
     {
         titleText.setTextSize(75);
         titleText.setText("2048");
-        field.reset();
+        field.reset(false);
         refresh();
     }
 

@@ -157,6 +157,7 @@ public class AccountSettingsActivity extends Activity
     {
         if(bitmap != null)
             dbHelper.updateUserPhoto(database, login, bitmap);
+        finish();
     }
 
     public void changeLogin(View view)
@@ -230,6 +231,8 @@ public class AccountSettingsActivity extends Activity
                     else
                         Toast.makeText(AccountSettingsActivity.this, "Wrong password!", Toast.LENGTH_SHORT).show();
                 }
+                else
+                    Toast.makeText(AccountSettingsActivity.this, "Fill all fields!", Toast.LENGTH_SHORT).show();
             }
         });
         cancelButton.setOnClickListener(new View.OnClickListener()

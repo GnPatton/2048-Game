@@ -18,11 +18,6 @@ import java.util.ArrayList;
 
 public class DBHelper extends SQLiteOpenHelper
 {
-    private static final String SHARED_PREFERENCES = "sharedPrefs";
-    private final String LOGIN_PREF = "LOGIN";
-    private final String PASSWORD_PREF = "LOGIN";
-    private final String CHECKBOX = "CHECKBOX";
-
     public static final int DATABASE_VERSION = 3;
     public static final String DATABASE_NAME = "gameDB";
     public static final String TABLE_ACCOUNTS = "user";
@@ -106,15 +101,30 @@ public class DBHelper extends SQLiteOpenHelper
 
         database.insert(TABLE_ACCOUNTS, null, contentValues);
         contentValues.clear();
+    }
 
-        contentValues.put(SCORE, 0);
-        contentValues.put(STATE, "");
-        contentValues.put(IS_LOSE, "0");
-        contentValues.put(IS_WIN, "0");
-        contentValues.put(USER_LOGIN, login);
+    public static void createGame(SQLiteDatabase database, String login, boolean isNew, int score)
+    {
+        ContentValues contentValues = new ContentValues();
+        if(isNew)
+        {
+            contentValues.put(SCORE, 0);
+            contentValues.put(STATE, "");
+            contentValues.put(IS_LOSE, 0);
+            contentValues.put(IS_WIN, 0);
+            contentValues.put(USER_LOGIN, login);
+        }
+        else
+        {
+            contentValues.put(SCORE, score);
+            contentValues.put(IS_LOSE, 0);
+            contentValues.put(IS_WIN, 1);
+            contentValues.put(USER_LOGIN, login);
+        }
 
         database.insert(TABLE_GAME, null, contentValues);
     }
+
 
     public void saveGameState(SQLiteDatabase database, String login, String state, int score)
     {
@@ -277,6 +287,8 @@ public class DBHelper extends SQLiteOpenHelper
                         maxScore = score;
                     count++;
                 }
+                else if(loginIn.equals(login))
+                    count++;
 
             }
             while(cursor.moveToNext());

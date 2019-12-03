@@ -4,10 +4,14 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Pair;
 
+import androidx.annotation.Nullable;
+
 import java.util.Random;
 
 public class Field
 {
+    SQLiteDatabase database;
+    String login;
     Sound sound;
     private int score = 0;
     private int previousStateScore = 0;
@@ -16,12 +20,18 @@ public class Field
 
     public Field(Context context, boolean isNewGame, String login, SQLiteDatabase database)
     {
+        this.database = database;
+        this.login = login;
+
         sound = new Sound(context);
         field = new int[4][4];
         previousStateField = new int[4][4];
 
         if(isNewGame)
-            reset();
+            if(login.equals("test"))
+                reset(true);
+            else
+                reset(false);
         else
             loadGame(login, database);
     }
@@ -37,13 +47,19 @@ public class Field
         score = pair.second;
     }
 
-    public void reset()
+    public void reset(boolean winGame)
     {
         for(int i=0; i<4; i++)
             for(int j=0; j<4; j++)
                 field[i][j] = 0;
         score = 0;
         createInitialCells();
+
+        if(winGame)
+        {
+            field[3][2] = 1024;
+            field[3][3] = 1024;
+        }
     }
 
     public void undo()
@@ -162,11 +178,15 @@ public class Field
 
     private boolean isWon()
     {
-        for(int i=0; i<3; i++)
+        for(int i=0; i<4; i++)
             for(int j=0; j<4; j++)
                 if(field[i][j] == 2048)
+                {
+                    DBHelper.createGame(database, login, false, score);
                     return true;
+                }
         return false;
+
     }
 
     public void shift(Direction direction)
@@ -366,19 +386,17 @@ public class Field
                 if(hasChange)
                     generateNewCell();
 
-                if(hasMerge)
+                if(hasMerge && !isWon())
                     sound.playMerge();
 
-                if(hasChange && !hasMerge)
+                if(hasChange && !hasMerge && !isWon())
                     sound.playSwipe();
 
                 if(isWon())
                     sound.playWin();
+                else if(isGameOver())
+                    sound.playLose();
             }
-            else
-                sound.playLose();
-            else
-                sound.playWin();
     }
 }
 
